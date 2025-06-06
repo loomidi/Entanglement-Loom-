@@ -1,0 +1,457 @@
+j<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loom Entanglement Generator - User Control</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --bg-color: #0d1a2b;
+            --primary-glow: #00e6e6; /* Cyan */
+            --secondary-glow: #ff66b2; /* Pink */
+            --tertiary-glow: #66ff66; /* Green */
+            --warning-color: #ffcc00; /* Yellow */
+            --critical-color: #ff4d4d; /* Red */
+            --text-color: #e0e0e0;
+            --panel-bg: rgba(13, 26, 43, 0.95);
+        }
+
+        /* Light Theme */
+        body.light-theme {
+            --bg-color: #f0f8ff; /* AliceBlue */
+            --primary-glow: #008c8c; /* Darker Cyan */
+            --secondary-glow: #d42a8b; /* Darker Pink */
+            --tertiary-glow: #00b300; /* Darker Green */
+            --warning-color: #cc9900; /* Darker Yellow */
+            --critical-color: #cc0000; /* Darker Red */
+            --text-color: #333333;
+            --panel-bg: rgba(240, 248, 255, 0.95);
+        }
+
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        h1 {
+            color: var(--primary-glow);
+            text-shadow: 0 0 10px var(--primary-glow);
+            margin-bottom: 30px;
+        }
+
+        .controls, .user-settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            background-color: rgba(0,0,0,0.1);
+        }
+        .user-settings {
+             background-color: var(--panel-bg);
+             border: 1px solid var(--tertiary-glow);
+             box-shadow: 0 0 10px var(--tertiary-glow);
+             color: var(--text-color);
+             font-family: 'Share Tech Mono', monospace;
+             font-size: 0.9em;
+             width: 95%;
+             max-width: 1000px;
+             align-items: center;
+             justify-content: center;
+        }
+        .user-settings label {
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-settings input[type="range"] {
+            width: 120px;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            transition: opacity .2s;
+        }
+        .user-settings input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-glow);
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--primary-glow);
+        }
+
+        button {
+            background-color: var(--primary-glow);
+            color: var(--bg-color);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary-glow);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        button:hover {
+            background-color: var(--secondary-glow);
+            box-shadow: 0 0 15px var(--secondary-glow);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 0 5px var(--secondary-glow);
+        }
+        #toggleAutoGenerateBtn.active {
+            background-color: var(--warning-color);
+            box-shadow: 0 0 10px var(--warning-color);
+        }
+        #filterCriticalBtn.active {
+            background-color: var(--critical-color);
+            box-shadow: 0 0 10px var(--critical-color);
+        }
+
+
+        #loomDisplay {
+            width: 95%;
+            max-width: 1000px;
+            min-height: 200px;
+            border: 2px solid var(--primary-glow);
+            box-shadow: 0 0 20px var(--primary-glow);
+            background: linear-gradient(45deg, rgba(0,230,230,0.03), rgba(255,102,178,0.03));
+            border-radius: 15px;
+            padding: 20px;
+            box-sizing: border-box;
+            margin-bottom: 30px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95em;
+            overflow-y: auto;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column-reverse; /* New entries appear at bottom */
+            transition: border-color 0.5s ease, box-shadow 0.5s ease, background 0.5s ease;
+        }
+
+        .entanglement-entry {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background-color: var(--panel-bg); /* Use panel bg for entries */
+            border-left: 5px solid var(--primary-glow);
+            animation: fadeIn 0.5s ease-out;
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+        }
+
+        .entanglement-entry.warning {
+            border-left-color: var(--warning-color);
+            /* background-color: rgba(60, 40, 20, 0.5); */
+        }
+        .entanglement-entry.critical {
+            border-left-color: var(--critical-color);
+            /* background-color: rgba(60, 20, 20, 0.5); */
+        }
+        .entanglement-entry.hidden {
+            display: none;
+        }
+
+        .entanglement-timestamp {
+            font-size: 0.75em;
+            color: var(--text-color);
+            opacity: 0.7;
+            text-align: right;
+            transition: color 0.5s ease;
+        }
+
+        .entanglement-detail {
+            color: var(--text-color);
+            line-height: 1.4;
+            transition: color 0.5s ease;
+        }
+
+        .entanglement-detail strong {
+            color: var(--tertiary-glow);
+            transition: color 0.5s ease;
+        }
+        .entanglement-detail .warning-text { color: var(--warning-color); }
+        .entanglement-detail .critical-text { color: var(--critical-color); }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .test-elements {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        .test-button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid var(--tertiary-glow);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.5s ease;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .test-button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Loom Entanglement Generator</h1>
+
+    <div class="user-settings">
+        <h3>Interface Controls:</h3>
+        <label>
+            Theme:
+            <button id="themeToggleBtn">Toggle Light/Dark</button>
+        </label>
+        <label>
+            Node Movement Speed:
+            <input type="range" id="nodeSpeedSlider" min="100" max="2000" value="1000">
+        </label>
+        <label>
+            Auto-Generate Interval (ms):
+            <input type="range" id="autoGenerateIntervalSlider" min="500" max="5000" value="2000">
+        </label>
+    </div>
+
+    <div class="controls">
+        <button id="generateEntanglementBtn">Generate Random Entanglement</button>
+        <button id="clearLoomBtn">Clear Loom Display</button>
+        <button id="toggleAutoGenerateBtn">Start Auto-Generate</button>
+        <button id="filterCriticalBtn">Show Only Critical</button>
+    </div>
+
+    <div id="loomDisplay">
+        <div class="entanglement-entry">
+            <span class="entanglement-timestamp">System Init: 2025-06-04 12:05:51</span>
+            <div class="entanglement-detail">Loom system initialized. Awaiting entanglement phenomena.</div>
+        </div>
+    </div>
+
+    <div class="test-elements">
+        <button class="test-button" id="btnHome">Home Button</button>
+        <button class="test-button" id="btnProfile">Profile Button</button>
+        <button class="test-button" id="btnSettings">Settings Button</button>
+        <button class="test-button" id="btnAdmin" style="border-color: var(--critical-color);">Admin Button</button>
+    </div>
+
+    <script>
+        const loomDisplay = document.getElementById('loomDisplay');
+        const generateEntanglementBtn = document.getElementById('generateEntanglementBtn');
+        const clearLoomBtn = document.getElementById('clearLoomBtn');
+        const toggleAutoGenerateBtn = document.getElementById('toggleAutoGenerateBtn');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const nodeSpeedSlider = document.getElementById('nodeSpeedSlider');
+        const autoGenerateIntervalSlider = document.getElementById('autoGenerateIntervalSlider');
+        const filterCriticalBtn = document.getElementById('filterCriticalBtn');
+
+        const testButtons = document.querySelectorAll('.test-button');
+
+        const userIds = ['User_Alice', 'User_Bob', 'User_Charlie', 'User_Daemon'];
+        const clickEventTypes = ['click', 'dblclick', 'contextmenu'];
+        const buttonIds = ['btnHome', 'btnProfile', 'btnSettings', 'btnAdmin'];
+
+        const conceptualListeners = {
+            'btnHome': { id: 'nav_home_listener', func: 'loadHomePage()', securityImpact: 'low' },
+            'btnProfile': { id: 'user_profile_listener', func: 'displayUserProfile()', securityImpact: 'medium' },
+            'btnSettings': { id: 'app_settings_listener', func: 'openSettingsModal()', securityImpact: 'low' },
+            'btnAdmin': { id: 'admin_dashboard_listener', func: 'authenticateAndLoadAdminPanel()', securityImpact: 'high' },
+            'global_logout_listener': { id: 'global_logout_handler', func: 'performSecureLogout()', securityImpact: 'medium' },
+            'background_monitor_listener': { id: 'bg_monitor_service', func: 'collectTelemetry()', securityImpact: 'low' }
+        };
+
+        let autoGenerateIntervalId = null;
+        let autoGenerateSpeed = parseInt(autoGenerateIntervalSlider.value); // Initial speed from slider
+        let nodeMovementIntervalId = null;
+        let nodeMovementSpeed = parseInt(nodeSpeedSlider.value); // Initial speed from slider
+        let showingOnlyCritical = false;
+
+        // --- Core Loom Functionality (from previous example, slightly adapted) ---
+
+        function generateRandomEntanglement() {
+            const randomUserId = userIds[Math.floor(Math.random() * userIds.length)];
+            const randomButtonId = buttonIds[Math.floor(Math.random() * buttonIds.length)];
+            const randomClickType = clickEventTypes[Math.floor(Math.random() * clickEventTypes.length)];
+            const associatedListener = conceptualListeners[randomButtonId] || conceptualListeners['global_logout_listener'];
+
+            const entanglementTypeRoll = Math.random();
+            let impact = 'normal';
+            let entanglementDescription = `UserID '${randomUserId}' performed a '${randomClickType}' on '${randomButtonId}'. This action is normally handled by listener '${associatedListener.id}'.`;
+
+            if (entanglementTypeRoll < 0.1) { // 10% chance of critical
+                impact = 'critical';
+                const criticalListener = conceptualListeners['btnAdmin'];
+                entanglementDescription = `<span class="critical-text">CRITICAL ENTANGLEMENT DETECTED:</span> UserID '<strong>${randomUserId}</strong>' (${randomUserId === 'User_Daemon' ? 'Daemon user' : 'Regular user'}) clicked on '<strong>${randomButtonId}</strong>' (normally handles: ${associatedListener.func}). This event is UNEXPECTEDLY entangled with '<strong>${criticalListener.id}</strong>' (Impact: ${criticalListener.securityImpact.toUpperCase()})!`;
+            } else if (entanglementTypeRoll < 0.3) { // 20% chance of warning
+                impact = 'warning';
+                entanglementDescription = `<span class="warning-text">WARNING ENTANGLEMENT:</span> UserID '<strong>${randomUserId}</strong>' interacted with '<strong>${randomButtonId}</strong>'. The listener '<strong>${associatedListener.id}</strong>' is showing an unusual data pattern for this specific click sequence. (Impact: ${associatedListener.securityImpact.toUpperCase()})`;
+            } else {
+                entanglementDescription = `Normal entanglement: UserID '<strong>${randomUserId}</strong>' clicked '<strong>${randomButtonId}</strong>', activating '<strong>${associatedListener.id}</strong>'.`;
+            }
+
+            logEntanglement(entanglementDescription, impact);
+        }
+
+        function logEntanglement(description, type = 'normal') {
+            const entryDiv = document.createElement('div');
+            entryDiv.classList.add('entanglement-entry', type); // Add type class
+            entryDiv.dataset.type = type; // Store type in dataset for filtering
+
+            const timestampSpan = document.createElement('span');
+            timestampSpan.classList.add('entanglement-timestamp');
+            timestampSpan.textContent = new Date().toLocaleString();
+
+            const detailDiv = document.createElement('div');
+            detailDiv.classList.add('entanglement-detail');
+            detailDiv.innerHTML = description;
+
+            entryDiv.appendChild(timestampSpan);
+            entryDiv.appendChild(detailDiv);
+            loomDisplay.prepend(entryDiv);
+
+            // Apply current filter if active
+            if (showingOnlyCritical && type !== 'critical') {
+                entryDiv.classList.add('hidden');
+            }
+        }
+
+        function clearLoomDisplay() {
+            while (loomDisplay.children.length > 0) { // Clear all children
+                loomDisplay.removeChild(loomDisplay.lastChild);
+            }
+             // Add initial message back
+            logEntanglement('Loom system initialized. Awaiting entanglement phenomena.', 'normal');
+        }
+
+        function startAutoGenerate() {
+            if (autoGenerateIntervalId) clearInterval(autoGenerateIntervalId);
+            autoGenerateIntervalId = setInterval(generateRandomEntanglement, autoGenerateSpeed);
+            toggleAutoGenerateBtn.textContent = 'Stop Auto-Generate';
+            toggleAutoGenerateBtn.classList.add('active');
+        }
+
+        function stopAutoGenerate() {
+            if (autoGenerateIntervalId) clearInterval(autoGenerateIntervalId);
+            autoGenerateIntervalId = null;
+            toggleAutoGenerateBtn.textContent = 'Start Auto-Generate';
+            toggleAutoGenerateBtn.classList.remove('active');
+        }
+
+        function toggleAutoGenerate() {
+            if (autoGenerateIntervalId) {
+                stopAutoGenerate();
+            } else {
+                startAutoGenerate();
+            }
+        }
+        
+        // --- User Control Functions ---
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            themeToggleBtn.textContent = isLight ? 'Toggle Dark Mode' : 'Toggle Light Mode';
+        }
+
+        function updateNodeMovementSpeed() {
+             // In this simple example, we don't have visual 'nodes' that move around
+             // in the loom display itself, only the log entries.
+             // If we had a visual graph, this would control their subtle animation.
+             // For this example, we'll just log it.
+             nodeMovementSpeed = parseInt(nodeSpeedSlider.value);
+             console.log(`Node movement speed adjusted to: ${nodeMovementSpeed}ms (conceptual)`);
+        }
+
+        function updateAutoGenerateInterval() {
+            autoGenerateSpeed = parseInt(autoGenerateIntervalSlider.value);
+            if (autoGenerateIntervalId) { // If auto-generate is active, restart it with new speed
+                stopAutoGenerate();
+                startAutoGenerate();
+            }
+            console.log(`Auto-generate interval set to: ${autoGenerateSpeed}ms`);
+        }
+
+        function filterCriticalEntanglements() {
+            showingOnlyCritical = !showingOnlyCritical;
+            filterCriticalBtn.classList.toggle('active', showingOnlyCritical);
+            filterCriticalBtn.textContent = showingOnlyCritical ? 'Show All Entanglements' : 'Show Only Critical';
+
+            const entries = loomDisplay.querySelectorAll('.entanglement-entry');
+            entries.forEach(entry => {
+                if (showingOnlyCritical) {
+                    if (entry.dataset.type !== 'critical') {
+                        entry.classList.add('hidden');
+                    }
+                } else {
+                    entry.classList.remove('hidden');
+                }
+            });
+        }
+
+        // --- Event Listeners ---
+        generateEntanglementBtn.addEventListener('click', generateRandomEntanglement);
+        clearLoomBtn.addEventListener('click', clearLoomDisplay);
+        toggleAutoGenerateBtn.addEventListener('click', toggleAutoGenerate);
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        nodeSpeedSlider.addEventListener('input', updateNodeMovementSpeed); // 'input' for real-time update
+        autoGenerateIntervalSlider.addEventListener('input', updateAutoGenerateInterval);
+        filterCriticalBtn.addEventListener('click', filterCriticalEntanglements);
+
+        // Simulate actual clicks triggering something (optional, for realism)
+        testButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const userId = userIds[Math.floor(Math.random() * userIds.length)]; // Simulate current user
+                const buttonId = event.target.id;
+                const listenerInfo = conceptualListeners[buttonId];
+                const action = listenerInfo ? `User ${userId} clicked '${buttonId}', triggering '${listenerInfo.id}' (${listenerInfo.func}).` : `User ${userId} clicked '${buttonId}' (no specific conceptual listener).`;
+                console.log(action);
+            });
+        });
+
+        // Initial setup
+        // Node movement speed in this simulation doesn't apply directly to the log entries.
+        // If there was a visual graph, this is where you'd start its animation loop.
+        // For now, it's just a conceptual setting the user can control.
+        updateNodeMovementSpeed();
+    </script>
+
+</body>
+</html>
